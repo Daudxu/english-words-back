@@ -17,5 +17,6 @@ async def login(request: LoginRequest, db: Session = Depends(get_db)):
     # 验证手机号和验证码
     user = await AuthService.verify_code_and_login(db, request.phone, request.code)
     if not user:
+        print("Invalid code or phone number - login failed")
         raise HTTPException(status_code=400, detail="Invalid code or phone number")
     return user

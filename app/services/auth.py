@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 from jose import jwt
 from sqlalchemy.orm import Session
 from app.core.config import settings
@@ -40,6 +40,12 @@ class AuthService:
     def create_jwt_token(user_id: int) -> str:
         # 生成 JWT Token
         expire = timedelta(minutes=settings.JWT_EXPIRE_MINUTES)
-        to_encode = {"sub": str(user_id), "exp": expire}
+
+        # 将timedelta转换为秒数
+        expire_seconds = expire.total_seconds()
+
+        # 获取当前时间并设置过期时间
+        to_encode = {"sub": str(user_id), "exp": int(expire_seconds + datetime.utcnow().timestamp())}
+
         encoded_jwt = jwt.encode(to_encode, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
         return encoded_jwt
