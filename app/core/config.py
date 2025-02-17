@@ -9,5 +9,10 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "HS256"            # JWT 签名算法
     JWT_EXPIRE_MINUTES: int = 30            # Token 过期时间（分钟）
 
+    # 新增 Redis 配置
+    REDIS_HOST: str = "localhost"
+    REDIS_PORT: int = 6379
+    REDIS_DB: int = 0
+
 # 创建配置实例
 settings = Settings()
