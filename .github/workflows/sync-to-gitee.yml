@@ -1,10 +1,10 @@
-name: Build app and deploy to aliyun
+name: Code To Gitee
 on:
   #监听push操作
   push:
     branches:
       # master分支，你也可以改成其他分支
-      - master
+      - devel
 jobs:
   Sync-Code-To-Gitee-job:
     # runs-on 指定job任务运行所需要的虚拟机环境
