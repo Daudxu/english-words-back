@@ -1,0 +1,39 @@
+name: Sync to Gitee
+
+on:
+  push:
+    branches:
+      - main  # 或你使用的默认分支名称
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Git
+        run: |
+          git config --global user.name 'your-github-username'
+          git config --global user.email 'your-github-email'
+          ssh-agent -s
+          echo "${{ secrets.GITEE_PRIVATE_KEY }}" | ssh-add -
+          mkdir -p ~/.ssh && echo "${{ secrets.GITEE_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+        env:
+          GITEE_PRIVATE_KEY: ${{ secrets.GITEE_PRIVATE_KEY }}
+          GITEE_KNOWN_HOSTS: ${{ secrets.GITEE_KNOWN_HOSTS }}
+
+      - name: Sync to Gitee
+        run: |
+          git remote add gitee git@gitee.com:your-gitee-username/your-gitee-repo.git
+          git push -u gitee --all
+          git push -u gitee --tags
+        env:
+          GIT_SSH_COMMAND: ssh -o StrictHostKeyChecking=no
+
+# 在 GitHub 仓库的 Settings -> Secrets 中添加以下机密：
+# - GITEE_PRIVATE_KEY: 你的 Gitee SSH 私钥（确保没有换行符）
+# - GITEE_KNOWN_HOSTS: gitee.com 的 SSH known_hosts 条目（可以通过 ssh-keyscan 命令获取）
