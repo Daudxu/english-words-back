@@ -1,13 +1,21 @@
 from pydantic import BaseModel
+from typing import Generic, TypeVar, Optional
+
+T = TypeVar('T')
 
 class PhoneRequest(BaseModel):
-    phone: str  # 手机号
+    phone: str  
 
 class LoginRequest(BaseModel):
-    phone: str  # 手机号
-    code: str   # 验证码
+    phone: str  
+    code: str   
 
 class LoginResponse(BaseModel):
-    user_id: int
+    user_id: Optional[T] = None
     phone: str
-    token: str  # 登录成功后返回的 JWT Token
+    token: str  
+
+class CommonResponse(BaseModel, Generic[T]):
+    status: int
+    message: str
+    data: Optional[T] = None

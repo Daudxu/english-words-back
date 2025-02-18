@@ -1,23 +1,42 @@
+# app/services/auth.py
+
 from datetime import datetime, timedelta
 from jose import jwt
 from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.db.models.user import User
-from app.schemas.auth import LoginResponse
+from app.schemas.auth import LoginResponse, CommonResponse
 from app.utils.sms import send_sms
+import random
+from app.utils.response import success_response, error_response
+import redis
+# 初始化 Redis 连接
+redis_client = redis.Redis(
+    host=settings.REDIS_HOST, 
+    port=settings.REDIS_PORT, 
+    db=settings.REDIS_DB
+)
 
 class AuthService:
     @staticmethod
-    async def send_verification_code(db: Session, phone: str):
-        # 调用短信 SDK 发送验证码
-        code = "123456"  # 模拟生成验证码
-        await send_sms(phone, f"Your verification code is: {code}")
+    async def send_verification_code(phone: str):
+        existing_code = redis_client.get(phone)
+        if existing_code:
+            return error_response(400, "验证码已发送。请等待一分钟。")
+        code = random.randint(100000, 999999)
+        try:
+            await send_sms(phone, f"你的验证码是: {code}")
+            redis_client.setex(phone, 60, code)
+            return success_response(message="发送成功")
+        except Exception as e:
+            return error_response(500, str(e))
 
     @staticmethod
-    async def verify_code_and_login(db: Session, phone: str, code: str) -> LoginResponse:
-        # 模拟验证码验证
-        if code != "123456":  # 假设验证码是 123456
-            return None
+    async def verify_code_and_login(db: Session, phone: str, code: str) -> CommonResponse[LoginResponse]:
+        stored_code = redis_client.get(phone)
+        if stored_code is None or stored_code.decode('utf-8') != code:
+            # 如果验证码错误，返回统一结构的错误信息
+            return CommonResponse(status=400, message="验证码不正确", data=None)
 
         # 查询用户
         user = db.query(User).filter(User.phone == phone).first()
@@ -30,22 +49,24 @@ class AuthService:
 
         # 生成 JWT Token
         token = AuthService.create_jwt_token(user.id)
-        return LoginResponse(
+
+        # 登录成功后，从 Redis 中删除验证码
+        redis_client.delete(phone)
+
+        # 构建 LoginResponse 实例
+        login_response = LoginResponse(
             user_id=user.id,
             phone=user.phone,
             token=token
         )
 
+        # 返回成功的 CommonResponse，包含 LoginResponse
+        return CommonResponse(status=200, message="Login successful", data=login_response)
+
     @staticmethod
     def create_jwt_token(user_id: int) -> str:
         # 生成 JWT Token
         expire = timedelta(minutes=settings.JWT_EXPIRE_MINUTES)
-
-        # 将timedelta转换为秒数
-        expire_seconds = expire.total_seconds()
-
-        # 获取当前时间并设置过期时间
-        to_encode = {"sub": str(user_id), "exp": int(expire_seconds + datetime.utcnow().timestamp())}
-
+        to_encode = {"sub": str(user_id), "exp": int(datetime.utcnow().timestamp() + expire.total_seconds())}
         encoded_jwt = jwt.encode(to_encode, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
         return encoded_jwt

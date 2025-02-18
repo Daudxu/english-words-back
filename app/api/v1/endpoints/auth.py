@@ -1,10 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from app.schemas.auth import PhoneRequest, LoginRequest, LoginResponse
+from app.schemas.auth import PhoneRequest, LoginRequest, LoginResponse, CommonResponse
 from app.services.auth import AuthService
 from app.db.session import get_db
 import redis
 from app.core.config import settings  # 假设 Redis 配置在这个文件中
+from app.utils.response import success_response, error_response
+import re
 
 router = APIRouter()
 
@@ -15,38 +17,21 @@ redis_client = redis.Redis(
     db=settings.REDIS_DB
 )
 
-@router.post("/send-code")
-async def send_code(request: PhoneRequest, db: Session = Depends(get_db)):
-    # 调用短信服务发送验证码
-    code = "123456"  # 这里假设验证码是固定的，实际应该使用随机生成的验证码
-    await AuthService.send_verification_code(db, request.phone)
-    
-    # 将验证码存储到 Redis 中，设置过期时间为 5 分钟（300 秒）
-    redis_client.setex(request.phone, 300, code)
-    
-    return {"message": "Verification code sent"}
+def is_valid_phone(phone):
+    pattern = re.compile(r'^1[3-9]\d{9}$')
+    return bool(pattern.match(phone))
 
-@router.post("/login", response_model=LoginResponse)
+@router.post("/send-code")
+async def send_code(request: PhoneRequest):
+    if not request.phone:
+        return error_response(400, "请输入手机号！")
+
+    # 验证是否为合法手机号
+    if not is_valid_phone(request.phone):
+        return error_response(400, "请输入正确的手机号！")
+
+    return await AuthService.send_verification_code(request.phone)
+ 
+@router.post("/login", response_model=CommonResponse[LoginResponse])
 async def login(request: LoginRequest, db: Session = Depends(get_db)):
-    # 从 Redis 中获取验证码
-    stored_code = redis_client.get(request.phone)
-    
-    if stored_code is None:
-        print("Verification code expired or not found - login failed")
-        raise HTTPException(status_code=400, detail="Verification code expired or not found")
-    
-    # 验证手机号和验证码
-    if request.code != stored_code.decode('utf-8'):
-        print("Invalid code or phone number - login failed")
-        raise HTTPException(status_code=400, detail="Invalid code or phone number")
-    
-    # 验证码验证通过后，进行登录操作
-    user = await AuthService.verify_code_and_login(db, request.phone, request.code)
-    if not user:
-        print("User not found - login failed")
-        raise HTTPException(status_code=400, detail="Invalid code or phone number")
-    
-    # 登录成功后，从 Redis 中删除验证码
-    redis_client.delete(request.phone)
-    
-    return user
+    return await AuthService.verify_code_and_login(db, request.phone, request.code)
