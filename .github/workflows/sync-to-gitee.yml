@@ -4,7 +4,7 @@ on:
   push:
     branches:
       # master分支，你也可以改成其他分支
-      - devel
+      - master
 jobs:
   Sync-Code-To-Gitee-job:
     # runs-on 指定job任务运行所需要的虚拟机环境
