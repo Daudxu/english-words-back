@@ -1,6 +1,6 @@
 # app/services/auth.py
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from jose import jwt
 from sqlalchemy.orm import Session
 from app.core.config import settings
@@ -10,6 +10,7 @@ from app.utils.sms import send_sms
 import random
 from app.utils.response import success_response, error_response
 import redis
+
 # 初始化 Redis 连接
 redis_client = redis.Redis(
     host=settings.REDIS_HOST, 
@@ -66,7 +67,16 @@ class AuthService:
     @staticmethod
     def create_jwt_token(user_id: int) -> str:
         # 生成 JWT Token
+        print(settings.JWT_EXPIRE_MINUTES)
+        print(settings.JWT_SECRET_KEY)
+        print(settings.JWT_ALGORITHM)
+        print(user_id)
         expire = timedelta(minutes=settings.JWT_EXPIRE_MINUTES)
-        to_encode = {"sub": str(user_id), "exp": int(datetime.utcnow().timestamp() + expire.total_seconds())}
+        to_encode = {
+            "sub": str(user_id),  # 用户ID
+            "exp": int((datetime.now(UTC) + expire).timestamp())  # 生成标准的 Unix 时间戳（秒）
+        }
         encoded_jwt = jwt.encode(to_encode, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
         return encoded_jwt
+    
+   

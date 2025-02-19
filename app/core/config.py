@@ -1,18 +1,26 @@
+# app/core/config.py
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
-    # 数据库连接字符串
-    DATABASE_URL: str = "mysql+pymysql://root:root@localhost:3306/app"
-    
-    # JWT 配置
-    JWT_SECRET_KEY: str = "your-secret-key"  # 用于签名 JWT 的密钥
-    JWT_ALGORITHM: str = "HS256"            # JWT 签名算法
-    JWT_EXPIRE_MINUTES: int = 30            # Token 过期时间（分钟）
+    DATABASE_URL: str  # 从环境变量加载数据库连接字符串
+    JWT_SECRET_KEY: str  # 从环境变量加载 JWT 密钥
+    JWT_ALGORITHM: str  # JWT 签名算法
+    JWT_EXPIRE_MINUTES: int  # JWT 过期时间（分钟）
+    REDIS_HOST: str  # Redis 主机
+    REDIS_PORT: int  # Redis 端口
+    REDIS_DB: int  # Redis 数据库
 
-    # 新增 Redis 配置
-    REDIS_HOST: str = "localhost"
-    REDIS_PORT: int = 6379
-    REDIS_DB: int = 0
+    # 白名单路径配置
+    WHITE_LIST_PATHS: list = [
+        "/api/v1/auth/send-code",  # 发送短信
+        "/api/v1/auth/login",  # 登录接口
+        "/api/v1/user-guide",  #
+        "/docs",  
+        "/openapi.json",  
+    ]
+
+    class Config:
+        env_file = ".env"  # 指定 .env 文件路径
 
 # 创建配置实例
 settings = Settings()

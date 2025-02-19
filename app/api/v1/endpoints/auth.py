@@ -5,7 +5,7 @@ from app.services.auth import AuthService
 from app.db.session import get_db
 import redis
 from app.core.config import settings  # 假设 Redis 配置在这个文件中
-from app.utils.response import success_response, error_response
+from app.utils.response import error_response
 import re
 
 router = APIRouter()
