@@ -9,7 +9,7 @@ apiKey = ''  # 在个人中心->我的数据,接口名称上方查看
 # 接口请求入参配置
 requestParams = {
     'key': apiKey,
-    'mobile': '13376059292',
+    'mobile': '13376059292', 
     'tpl_id': '157293',
     'vars': '{"code":123456}',
     'tpl_value': '',
