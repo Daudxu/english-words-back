@@ -10,6 +10,7 @@ from app.utils.sms import send_sms
 import random
 from app.utils.response import success_response, error_response
 import redis
+import pytz
 
 # 初始化 Redis 连接
 redis_client = redis.Redis(
@@ -46,8 +47,13 @@ class AuthService:
             # 如果用户不存在，可以自动创建用户
             user = User(phone=phone)
             # 设置 VIP 相关时间
-            current_time = int(datetime.utcnow().timestamp())  # 当前时间戳
-            vip_end_time = current_time + (2 * 24 * 60 * 60)  # 当前时间 + 2天（单位秒）
+            tz = pytz.timezone('Asia/Shanghai')
+            # 获取当前东八区的时间
+            current_time_east8 = datetime.now(tz)
+            # 获取当前东八区时间对应的 Unix 时间戳（秒）
+            current_time = int(current_time_east8.timestamp())
+            # 当前时间 + 2 天（单位秒）
+            vip_end_time = current_time + (2 * 24 * 60 * 60)
 
             user.vip_start_time = current_time
             user.vip_end_time = vip_end_time
