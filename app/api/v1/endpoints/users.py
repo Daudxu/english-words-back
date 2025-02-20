@@ -1,13 +1,13 @@
-# app/api/v1/endpoints/users.py
 from fastapi import APIRouter, Request, Depends, HTTPException
+from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.db.models.user import User
-from sqlalchemy.orm import Session
+from app.schemas.user import CommonResponse, UserResponse  # 引入UserResponse和CommonResponse
 
 router = APIRouter()
 
 # 获取当前用户信息
-@router.get("/me")
+@router.get("/me", response_model=CommonResponse)
 async def get_user_info(
     request: Request, 
     db: Session = Depends(get_db)
@@ -29,8 +29,18 @@ async def get_user_info(
             detail="用户不存在"
         )
     
-    return {
-        "user_id": user.id,
-        "phone": user.phone,
-        "name": user.name
-    }
+    # 构建 UserResponse 实例
+    user_data = UserResponse(
+        user_id=user.id,
+        name=user.name,
+        phone=user.phone,
+        vip_start_time=user.vip_start_time or 0,
+        vip_end_time=user.vip_end_time or 0
+    )
+
+    # 返回 CommonResponse，包含 UserResponse
+    return CommonResponse(
+        status=200,
+        message="获取用户信息成功",
+        data=user_data
+    )

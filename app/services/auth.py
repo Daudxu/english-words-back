@@ -25,10 +25,11 @@ class AuthService:
         if existing_code:
             return error_response(400, "验证码已发送。请等待一分钟。")
         code = random.randint(100000, 999999)
+        code_str = str(code)
+
         try:
-            await send_sms(phone, f"你的验证码是: {code}")
             redis_client.setex(phone, 60, code)
-            return success_response(message="发送成功")
+            return send_sms(phone, code_str)
         except Exception as e:
             return error_response(500, str(e))
 

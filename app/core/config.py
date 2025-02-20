@@ -10,6 +10,10 @@ class Settings(BaseSettings):
     REDIS_PORT: int  # Redis 端口
     REDIS_DB: int  # Redis 数据库
 
+    # SMS配置
+    SMS_API_URL: str  # Redis 数据库
+    SMS_API_KEY: str  # Redis 数据库
+
     # 白名单路径配置
     WHITE_LIST_PATHS: list = [
         "/api/v1/auth/send-code",  # 发送短信
