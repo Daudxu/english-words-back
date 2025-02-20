@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     WHITE_LIST_PATHS: list = [
         "/api/v1/auth/send-code",  # 发送短信
         "/api/v1/auth/login",  # 登录接口
-        "/api/v1/user-guide",  #
+        "/api/v1/user-guide/.*",  
         "/docs",  
         "/openapi.json",  
     ]

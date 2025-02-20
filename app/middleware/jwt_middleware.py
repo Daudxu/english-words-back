@@ -6,6 +6,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from jose import jwt, JWTError, ExpiredSignatureError
 from app.core.config import settings
 import logging
+import re
 
 # 初始化 logger
 logger = logging.getLogger(__name__)
@@ -14,10 +15,11 @@ class JWTMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         logger.debug(f"Processing request: {request.method} {request.url.path}")
         
-        # 白名单路径检查（精确匹配）
-        if request.url.path in settings.WHITE_LIST_PATHS:
-            logger.debug(f"Skipping authentication for path: {request.url.path}")
-            return await call_next(request)
+        # 白名单路径检查（使用正则表达式匹配）
+        for pattern in settings.WHITE_LIST_PATHS:
+            if re.fullmatch(pattern, request.url.path):
+                logger.debug(f"Skipping authentication for path: {request.url.path}")
+                return await call_next(request)
 
         # Token 提取与验证
         auth_header = request.headers.get("Authorization")
