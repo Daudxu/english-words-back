@@ -45,6 +45,13 @@ class AuthService:
         if not user:
             # 如果用户不存在，可以自动创建用户
             user = User(phone=phone)
+            # 设置 VIP 相关时间
+            current_time = int(datetime.utcnow().timestamp())  # 当前时间戳
+            vip_end_time = current_time + (2 * 24 * 60 * 60)  # 当前时间 + 2天（单位秒）
+
+            user.vip_start_time = current_time
+            user.vip_end_time = vip_end_time
+
             db.add(user)
             db.commit()
             db.refresh(user)
