@@ -20,11 +20,11 @@ jobs:
         dst_key: ${{ secrets.GITEE_PRIVATE_KEY }}
         dst_token: ${{ secrets.GITEE_TOKEN }}
         # 支持Github/Gitee的用户、组织以及Gitlab的组
-        white_list: 'english-words-back'
         static_list: "english-words-back"
         account_type: org
         force_update: true
+        debug: true
         timeout: '600s'
         # 支持分别设置源和目的端的类型
-        # src_account_type: org 0eca7fdcbc661c7ebfc1506a6ca1b836
+        # src_account_type: org 0eca7fdcbc661c7ebfc1506a6ca1b836 
         # dst_account_type: org
