@@ -29,7 +29,7 @@ class AuthService:
         code_str = str(code)
 
         try:
-            redis_client.setex(phone, 60, code)
+            redis_client.setex(phone, 60*5, code)
             return send_sms(phone, code_str)
         except Exception as e:
             return error_response(500, str(e))
@@ -76,7 +76,7 @@ class AuthService:
         )
 
         # 返回成功的 CommonResponse，包含 LoginResponse
-        return CommonResponse(status=200, message="Login successful", data=login_response)
+        return CommonResponse(status=200, message="登陆成功", data=login_response)
 
     @staticmethod
     def create_jwt_token(user_id: int) -> str:

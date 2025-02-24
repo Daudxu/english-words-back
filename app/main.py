@@ -2,9 +2,26 @@
 from fastapi import FastAPI
 from app.api.v1.routers import api_router
 from app.middleware.jwt_middleware import JWTMiddleware  # 导入中间件
+from fastapi.middleware.cors import CORSMiddleware
 
 # 创建 FastAPI 应用
 app = FastAPI(title="App")
+
+# 添加 CORS 中间件
+
+# 配置 CORS 中间件
+origins = [
+    "http://localhost:8081",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  # 允许的来源列表
+    allow_credentials=True,  # 是否允许发送 Cookie
+    allow_methods=["*"],     # 允许所有 HTTP 方法 (GET, POST, PUT, DELETE, etc.)
+    allow_headers=["*"],     # 允许所有的请求头
+)
+
 
 # 将 JWT 校验中间件添加到 FastAPI 应用中
 app.add_middleware(JWTMiddleware)
