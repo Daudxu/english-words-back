@@ -10,7 +10,7 @@ router = APIRouter()
 @router.get("/{type}", response_model=CommonResponse[UserGuideResponse])
 async def get_user_guide(type: str, db: Session = Depends(get_db)):
     # 验证type是否合法
-    if type not in ['privacy_policy', 'user_agreement', 'contact_info']:
+    if type not in ['privacy_policy', 'user_agreement', 'contact_info', 'complaint', 'about']:
         # 直接返回带有错误状态的CommonResponse
         return CommonResponse(status=400, message="Invalid type provided", data=None)
 

@@ -8,6 +8,8 @@ class UserGuideType(Enum):
     privacy_policy = "privacy_policy"
     user_agreement = "user_agreement"
     contact_info = "contact_info"
+    complaint = "complaint"
+    about = "about"
 
 # 定义泛型类型变量 T
 T = TypeVar('T')
