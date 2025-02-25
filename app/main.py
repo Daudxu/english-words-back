@@ -11,15 +11,16 @@ app = FastAPI(title="App")
 
 # 配置 CORS 中间件
 origins = [
-    "http://localhost:8081",
+    # "http://localhost:8081",
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,  # 允许的来源列表
+    # allow_origins=origins,  # 允许的来源列表
+    allow_origins=["*"],  # 允许的来源列表
     allow_credentials=True,  # 是否允许发送 Cookie
-    allow_methods=["*"],     # 允许所有 HTTP 方法 (GET, POST, PUT, DELETE, etc.)
-    allow_headers=["*"],     # 允许所有的请求头
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],  # 明确列出允许的方法
+    allow_headers=["Content-Type", "Authorization"],      # 允许所有的请求头
 )
 
 

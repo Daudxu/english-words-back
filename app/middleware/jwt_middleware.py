@@ -14,6 +14,9 @@ logger = logging.getLogger(__name__)
 class JWTMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         logger.debug(f"Processing request: {request.method} {request.url.path}")
+          # 跳过 OPTIONS 预检请求
+        if request.method == "OPTIONS":
+            return await call_next(request)
         
         # 白名单路径检查（使用正则表达式匹配）
         for pattern in settings.WHITE_LIST_PATHS:
