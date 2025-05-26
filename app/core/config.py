@@ -23,6 +23,11 @@ class Settings(BaseSettings):
         "/openapi.json",  
     ]
 
+    # 新增模型相关配置
+    MODEL_BASE_URL: str = ""
+    MODEL_API_KEY: str = ""
+    MODEL_NAME: str = ""
+
     class Config:
         env_file = ".env"  # 指定 .env 文件路径
 
